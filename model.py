@@ -21,9 +21,8 @@ class RNNCell(nn.Module):
             raise ValueError("Invalid nonlinearity selected for RNN.")
         
         self.W_rec = torch.nn.Parameter(torch.tensor([5.0]), requires_grad=True)
-        self.W_in = torch.nn.Parameter(torch.tensor([0.2]), requires_grad=False)
+        self.W_in = torch.nn.Parameter(torch.tensor([0.2]), requires_grad=True)
         self.bias = torch.nn.Parameter(torch.tensor([0.0]), requires_grad=True)
-
 
     def forward(self, input, prev_state=None):
         

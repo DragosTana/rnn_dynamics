@@ -4,7 +4,7 @@ from scipy.optimize import fsolve, root, brenth, root_scalar
 from scipy.optimize import newton
 import time
 import math
-
+import copy
 def function(x, b):
     return 5*np.tanh(x) - x + b
 
@@ -29,11 +29,9 @@ iterations = 1000
 for i in range(iterations):
     print("Iteration: ", i) 
     graf_states = ax.scatter(*zip(*points), c = 'g', s=10)
-    new_points = [(b[i], function(states[i], b[i])) for i in range(len(states))]
+    new_points = [(b[i], function(points[i][1], b[i])) for i in range(len(points))]
     points = new_points
     plt.pause(0.01)
     graf_states.remove()
     
 plt.show()
-
-    
