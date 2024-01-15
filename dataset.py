@@ -17,7 +17,7 @@ class FlipFlopData(object):
 		n_bits=3,
 		n_time=64,
 		p=0.5, 
-		random_seed=0):
+		random_seed=None):
 		''' Creates a FlipFlopData object.
 
 		Args:

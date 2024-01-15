@@ -21,8 +21,12 @@ class RNNCell(nn.Module):
             raise ValueError("Invalid nonlinearity selected for RNN.")
         
         self.W_rec = torch.nn.Parameter(torch.tensor([5.0]), requires_grad=True)
-        self.W_in = torch.nn.Parameter(torch.tensor([0.2]), requires_grad=True)
+        self.W_in = torch.nn.Parameter(torch.tensor([0.2]), requires_grad=False)
         self.bias = torch.nn.Parameter(torch.tensor([0.0]), requires_grad=True)
+        
+        #self.W_rec = torch.nn.Parameter(torch.randn(hidden_size, hidden_size), requires_grad=True)
+        #self.W_in = torch.nn.Parameter(torch.randn(hidden_size, input_size), requires_grad=True)
+        #self.bias = torch.nn.Parameter(torch.randn(hidden_size), requires_grad=True)
 
     def forward(self, input, prev_state=None):
         
@@ -61,9 +65,9 @@ if __name__ == "__main__":
         losses = []
         biases = []
         prev_state = torch.tensor([[0.2]])
-        
         fig, ax = plt.subplots()
         
+        plt.pause(5)
         for step in range(1000):
             pred = rnn.forward(input_data, prev_state)
             prev_state = pred
@@ -74,30 +78,37 @@ if __name__ == "__main__":
             biases.append(copy.deepcopy(rnn.bias.data))
             losses.append(loss.data)
             
-            b = np.linspace(-10, 10, 100)
-            points = []
-            for i in range(len(b)):
-                initializations = np.linspace(-10, 10, 3)
-                for j in range(len(initializations)):
-                    root = fsolve(function, initializations[j], fprime=derivative, args=(rnn.W_rec.data, b[i]))
-                    points.append((b[i], root))
-                    
-            stable_points = [p for p in points if derivative(p[1], rnn.W_rec.data, p[0]) > 1]
-            unstable_points = [p for p in points if derivative(p[1], rnn.W_rec.data, p[0]) < 1]
-            status = ax.scatter(rnn.bias.data, pred.data, c = 'g', s=40)
-            graf_stable = ax.scatter(*zip(*stable_points), c = 'b', s=10)
-            graf_unstable = ax.scatter(*zip(*unstable_points), c = 'r', s=10)
-            
-            plt.legend((status, graf_stable, graf_unstable),
-                        ('Current state', 'Stable points', 'Unstable points'),
-                        scatterpoints=1,
-                        loc='lower left',
-                        ncol=3,
-                        fontsize=10)
-            
-            plt.pause(0.001)
-            status.remove()
-            graf_stable.remove()
-            graf_unstable.remove()
+            #b = np.linspace(-10, 10, 100)
+            #points = []
+            #for i in range(len(b)):
+            #    initializations = np.linspace(-10, 10, 3)
+            #    for j in range(len(initializations)):
+            #        root = fsolve(function, initializations[j], fprime=derivative, args=(float(rnn.W_rec.data), b[i]))
+            #        points.append((b[i], root))
+            #        
+            #stable_points = [p for p in points if derivative(p[1], rnn.W_rec.data, p[0]) < 0]
+            #unstable_points = [p for p in points if derivative(p[1], rnn.W_rec.data, p[0]) > 0]
+            #status = ax.scatter(rnn.bias.data, pred.data, c = 'b', s=40)
+            #graf_stable = ax.scatter(*zip(*stable_points), c = 'g', s=10)
+            #graf_unstable = ax.scatter(*zip(*unstable_points), c = 'r', s=10)
+            #
+            #plt.legend((status, graf_stable, graf_unstable),
+            #            ('Current state', 'Stable points', 'Unstable points'),
+            #            scatterpoints=1,
+            #            loc='lower left',
+            #            ncol=3,
+            #            fontsize=10)
+            #
+            #plt.pause(0.001)
+            #status.remove()
+            #graf_stable.remove()
+            #graf_unstable.remove()
 
+        losses = np.array(losses)
+        biases = [b.item() for b in biases]
+        
+        plt.plot(losses)
+        plt.plot(biases)
+        plt.legend(('Loss', 'Bias'))
+        plt.xlabel('Epochs')
         plt.show()
