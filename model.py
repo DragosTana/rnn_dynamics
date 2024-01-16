@@ -20,29 +20,31 @@ class RNNCell(nn.Module):
         if self.nonlinearity not in ["tanh", "sigmoid"]:
             raise ValueError("Invalid nonlinearity selected for RNN.")
         
-        self.W_rec = torch.nn.Parameter(torch.tensor([5.0]), requires_grad=True)
-        self.W_in = torch.nn.Parameter(torch.tensor([0.2]), requires_grad=False)
-        self.bias = torch.nn.Parameter(torch.tensor([0.0]), requires_grad=True)
+        #self.W_rec = torch.nn.Parameter(torch.tensor([5.0]), requires_grad=True)
+        #self.W_in = torch.nn.Parameter(torch.tensor([0.2]), requires_grad=False)
+        #self.bias = torch.nn.Parameter(torch.tensor([0.0]), requires_grad=True)
         
-        #self.W_rec = torch.nn.Parameter(torch.randn(hidden_size, hidden_size), requires_grad=True)
-        #self.W_in = torch.nn.Parameter(torch.randn(hidden_size, input_size), requires_grad=True)
-        #self.bias = torch.nn.Parameter(torch.randn(hidden_size), requires_grad=True)
+        self.W_rec = torch.nn.Parameter(torch.randn((hidden_size, hidden_size)), requires_grad=True)
+        self.W_in = torch.nn.Parameter(torch.randn((hidden_size, input_size)), requires_grad=True)
+        self.bias = torch.nn.Parameter(torch.randn((hidden_size)).T, requires_grad=True)
+        self.fc = nn.Linear(hidden_size, 1)
 
     def forward(self, input, prev_state=None):
         
         if prev_state is None:
-            prev_state = Variable(input.new_zeros(input.size(0), self.hidden_size))
+            prev_state = torch.zeros(self.hidden_size, 1)
         else:
-            prev_state = Variable(torch.tensor([prev_state]))
+            prev_state = Variable(prev_state)
             
-        input = Variable(torch.tensor([input]))
-
-        if self.nonlinearity == "tanh":
-            next_state = torch.matmul(self.W_rec, torch.tanh(prev_state)) + torch.matmul(self.W_in, input) + self.bias
-        elif self.nonlinearity == "sigmoid":
-            next_state = torch.matmul(self.W_rec, torch.sigmoid(prev_state)) + torch.matmul(self.W_in, input) + self.bias
+        input = Variable(input).view(1)
         
-        return next_state 
+        if self.nonlinearity == "tanh":
+            next_state = torch.add(torch.add(torch.matmul(self.W_rec, torch.tanh(prev_state)).view(self.hidden_size), torch.matmul(self.W_in, input)), self.bias)
+        elif self.nonlinearity == "sigmoid":
+            next_state = torch.add(torch.add(torch.matmul(self.W_rec, torch.sigmoid(prev_state)).view(self.hidden_size), torch.matmul(self.W_in, input)), self.bias)
+        
+        output = self.fc(next_state)
+        return (output, next_state)
     
 def function(x, w, b):
     return w*np.tanh(x) - x + b
